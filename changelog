@@ -1,0 +1,24 @@
+
+Extract the repeated logic into a helper function.
+
+Use a dictionary or named structure to map events with names or descriptions, making it easier to manage and extend.
+
+Add type hints for better clarity.
+
+Add an explicit exit option or a win condition.
+
+Values like 100 for health, 5-20 for gold, and 5-15 for healing are hardcoded, making it harder to tweak game balance.
+Now define these values as constants.
+
+Add validation for user inputs to avoid unintended behavior.
+
+The time.sleep(1) in the battle function can make debugging or playing slower.
+Now it optional or configurable.
+
+Simplify the logic by removing unnecessary checks.
+
+Add periodic summaries or goals.
+
+
+
+
