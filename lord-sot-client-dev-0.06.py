@@ -2,7 +2,7 @@ import socket
 import threading
 
 # Server details
-SERVER_IP = "127.0.0.1"  # Update this with the server's IP address if running on a different machine
+SERVER_IP = "127.0.0.1"  # Replace with the server's IP address if running on another machine
 PORT = 9999
 
 def main_client():
@@ -18,7 +18,7 @@ def main_client():
                     if not message:
                         print("Server disconnected.")
                         break
-                    print(f"Server: {message}")  # Debug log
+                    print(f"Server: {message}")
             except ConnectionResetError:
                 print("Connection to the server was lost.")
             finally:
@@ -29,10 +29,13 @@ def main_client():
         # Start a thread to listen for server messages
         threading.Thread(target=listen_for_messages, daemon=True).start()
 
+        # Handle user input for name and actions
+        name = input("> Enter your name: ")
+        client.sendall(name.encode())  # Send name to server
+
         while True:
             action = input("> ")
-            if action.strip():
-                client.sendall(action.encode())  # Send action to the server
+            client.sendall(action.encode())
 
     except ConnectionRefusedError:
         print("Unable to connect to the server. Make sure the server is running.")
