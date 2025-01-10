@@ -122,8 +122,14 @@ def handle_turn(player: dict, player_index: int):
         player["notified"] = False  # Reset flag when it's their turn
 
     # Prompt player for action
-    player["socket"].sendall("Your turn! Choose [explore], [rest], or [quit]: ".encode())
-    action = player["socket"].recv(1024).decode().strip().lower()
+    try:
+        player["socket"].sendall("Your turn! Choose [explore], [rest], or [quit]: ".encode())
+        player["socket"].settimeout(30)  # Set a timeout for input
+        action = player["socket"].recv(1024).decode().strip().lower()
+    except socket.timeout:
+        broadcast(f"{player['name']} took too long and their turn is skipped.")
+        action = "rest"  # Default action
+
     print(f"Action received from {player['name']}: {action}")
 
     # Handle actions
@@ -188,6 +194,7 @@ def handle_player(player: dict, player_index: int):
 def main_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((HOST, PORT))
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.listen(MAX_PLAYERS)
     print(f"Server running on {HOST}:{PORT}... Waiting for players to join.")
 
@@ -195,7 +202,11 @@ def main_server():
         client_socket, addr = server.accept()
         print(f"Connection received from {addr}")  # Debug log
         client_socket.sendall("Enter your name: ".encode())
-        name = client_socket.recv(1024).decode().strip()
+        name = client_socket.recv(1024).decode().strip()[:20]  # Limit name length to 20
+        if not name.isalnum():
+            client_socket.sendall("Invalid name. Only alphanumeric characters are allowed.\n".encode())
+            client_socket.close()
+            continue
         print(f"Received name: {name}")  # Debug log
         players.append({"socket": client_socket, "name": name, "health": 100, "gold": 0})
         print(f"Player {name} added to the game.")  # Debug log
